@@ -7,7 +7,14 @@
 
 <MudContainer MaxWidth="MaxWidth.Medium">
     <MudText Typo="Typo.h4">BC Hydro Peak Rates Calculator</MudText>
-
+    <br />
+    <MudLink Href="https://app.bchydro.com/datadownload/web/download-centre.html" Target="_blank">
+        Go to BC Hydro Data Export Centre
+    </MudLink>
+    <MudText>
+        Export the "Consumption History" with the Hourly Interval for the past 11 months and load the CSV below.
+    </MudText>
+    <br />
     <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles" Accept=".csv" MaximumFileCount="1">
         <ButtonTemplate>
             <MudButton HtmlTag="label"
