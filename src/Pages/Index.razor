@@ -19,79 +19,22 @@
             </MudButton>
         </ButtonTemplate>
     </MudFileUpload>
+
+    <MudDataGrid Items="@finalData">
+        <Columns>
+            <Column T="AggregatedData" Title="Month & Year">
+                <CellTemplate>
+                    @context.Item.IntervalStartDateTime.Month/@context.Item.IntervalStartDateTime.Year
+                </CellTemplate>
+            </Column>
+            <Column T="AggregatedData" Field="NetConsumption">
+            </Column>
+            <Column T="AggregatedData" Field="OldCost">
+
+            </Column>
+            <Column T="AggregatedData" Field="NewCost">
+            </Column>
+        </Columns>
+    </MudDataGrid>
 </MudContainer>
 
-@code
-{
-    List<AccountData> accounDatas;
-
-    private async Task UploadFiles(IBrowserFile file) {
-        var memory = new MemoryStream();
-        await file.OpenReadStream(long.MaxValue).CopyToAsync(memory);
-        memory.Seek(0, SeekOrigin.Begin);
-
-        using (var reader = new StreamReader(memory))
-        using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
-        {
-            csv.Context.RegisterClassMap<AccountDataMap>();
-
-            accounDatas = csv.GetRecords<AccountData>().ToList();
-
-            foreach (var record in accounDatas)
-            {
-                var step2 = IsStep2(record);
-
-                record.OldCost = 0.2090 + GetOldCost(step2);
-
-                record.NewCost = 0.2090 + GetNewCost(step2, record);
-            }
-        }
-    }
-
-    public class AccountData
-    {
-        public string AccountHolder { get; set; }
-        public string AccountNumber { get; set; }
-        public DateTime IntervalStartDateTime { get; set; }
-        public string NetConsumption { get; set; }
-        public string Demand { get; set; }
-        public string PowerFactor { get; set; }
-        public string EstimatedUsage { get; set; }
-        public string ServiceAddress { get; set; }
-        public string City { get; set; }
-        public double OldCost { get; set; }
-        public double NewCost { get; set; }
-    }
-
-    public sealed class AccountDataMap : ClassMap<AccountData>
-    {
-        public AccountDataMap()
-        {
-            Map(m => m.AccountHolder).Name("Account Holder");
-            Map(m => m.AccountNumber).Name("Account Number");
-            Map(m => m.IntervalStartDateTime).Name("Interval Start Date/Time");
-            Map(m => m.NetConsumption).Name("Net Consumption (kWh)");
-            Map(m => m.Demand).Name("Demand (kW)");
-            Map(m => m.PowerFactor).Name("Power Factor (%)");
-            Map(m => m.EstimatedUsage).Name("Estimated Usage");
-            Map(m => m.ServiceAddress).Name("Service Address");
-            Map(m => m.City).Name("City");
-        }
-    }
-
-
-    public bool IsStep2(AccountData data)
-    {
-        return true;
-    }
-
-    public double GetOldCost(bool step2)
-    {        
-        return step2 == false ? 0.0950 : 0.1408;
-    }
-
-    public double GetNewCost(bool step2, AccountData data)
-    {
-        return 0.00;
-    }
-}
