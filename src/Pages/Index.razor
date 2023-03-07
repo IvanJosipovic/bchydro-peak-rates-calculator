@@ -19,8 +19,10 @@
             </MudButton>
         </ButtonTemplate>
     </MudFileUpload>
+</MudContainer>
 
-    <MudDataGrid Items="@finalData">
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-5">
+    <MudDataGrid Items="@finalData" Dense="true" Hover="true">
         <Columns>
             <Column T="AccountData" Field="IntervalStartDateTime" Title="Month & Year">
                 <CellTemplate>
@@ -45,4 +47,3 @@
         </Columns>
     </MudDataGrid>
 </MudContainer>
-
