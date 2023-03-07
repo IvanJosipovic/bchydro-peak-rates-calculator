@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using CsvHelper;
 using System.Globalization;
 using CsvHelper.Configuration;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace bchydro_peak_rates_calculator.Pages;
 
@@ -68,61 +69,16 @@ public partial class Index
 
         foreach (var group in monthGrouppings)
         {
-            var item = new AggregatedData();
-            item.IntervalStartDateTime = DateTime.Parse($"{group.Key.Month}/{group.Key.Year}");
-            item.NetConsumption = group.Sum(x => x.NetConsumption);
-            item.OldCost = group.Sum(x => x.OldCost);
-            item.NewCost = group.Sum(x => x.NewCost);
+            var item = new AggregatedData
+            {
+                IntervalStartDateTime = DateTime.Parse($"{group.Key.Month}/{group.Key.Year}"),
+                NetConsumption = group.Sum(x => x.NetConsumption),
+                OldCost = group.Sum(x => x.OldCost),
+                NewCost = group.Sum(x => x.NewCost)
+            };
+
             finalData.Add(item);
         }
-    }
-
-    public class GroupClass {
-        public GroupClass(int year, int month) {
-            Year = year;
-            Month = month;
-        }
-
-        public int Year { get; set; }
-        public int Month { get; set; }
-
-        public override int GetHashCode()
-        {
-            int hash = 23;
-            hash = hash * 31 + Year.GetHashCode();
-            hash = hash * 31 + Month.GetHashCode();
-            return hash;
-        }
-
-        public override bool Equals(object obj)
-        {
-            var groupObj = obj as GroupClass;
-            if (groupObj == null) return false;
-            return (Year == groupObj.Year && Month == groupObj.Month);
-        }
-    }
-
-    public class AccountData
-    {
-        //public string AccountHolder { get; set; }
-        //public string AccountNumber { get; set; }
-        public DateTime IntervalStartDateTime { get; set; }
-        public decimal NetConsumption { get; set; }
-        //public string Demand { get; set; }
-        //public string PowerFactor { get; set; }
-        //public string EstimatedUsage { get; set; }
-        //public string ServiceAddress { get; set; }
-        //public string City { get; set; }
-        public decimal OldCost { get; set; }
-        public decimal NewCost { get; set; }
-    }
-
-    public class AggregatedData
-    {
-        public DateTime IntervalStartDateTime { get; set; }
-        public decimal NetConsumption { get; set; }
-        public decimal OldCost { get; set; }
-        public decimal NewCost { get; set; }
     }
 
     public bool IsStep2(AccountData data)
@@ -152,6 +108,27 @@ public partial class Index
 
     public decimal GetNewCost(bool step2, AccountData data)
     {
-        return 0.00M;
+        // Peak hour list
+        int[] peakHours = new int[] { 16, 17, 18, 19, 20 };
+
+        // Off peak hours
+        int[] offPeak = new int[] { 23, 0, 1, 2, 3, 4, 5, 6 };
+
+        // Peak surchage
+        decimal peakSurchage = 0.05M;
+
+        // Off peak discount
+        decimal offPeakDiscount = 0.05M;
+
+        if (peakHours.Contains(data.IntervalStartDateTime.Hour))
+        {
+            return GetOldCost(step2) + peakSurchage;
+        }
+        else if (offPeak.Contains(data.IntervalStartDateTime.Hour))
+        {
+            return GetOldCost(step2) - offPeakDiscount;
+        }
+
+        return GetOldCost(step2);
     }
 }
