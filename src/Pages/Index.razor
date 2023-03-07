@@ -22,22 +22,22 @@
 
     <MudDataGrid Items="@finalData">
         <Columns>
-            <Column T="AggregatedData" Field="IntervalStartDateTime" Title="Month & Year">
+            <Column T="AccountData" Field="IntervalStartDateTime" Title="Month & Year">
                 <CellTemplate>
                     @context.Item.IntervalStartDateTime.Month/@context.Item.IntervalStartDateTime.Year
                 </CellTemplate>
             </Column>
-            <Column T="AggregatedData" Field="NetConsumption" Title="Net Consumption">
+            <Column T="AccountData" Field="NetConsumption" Title="Net Consumption">
                 <CellTemplate>
                     @context.Item.NetConsumption.ToString("F2")kw
                 </CellTemplate>
             </Column>
-            <Column T="AggregatedData" Field="OldCost" Title="Old Cost">
+            <Column T="AccountData" Field="OldCost" Title="Old Cost">
                 <CellTemplate>
                     $@context.Item.OldCost.ToString("F2")
                 </CellTemplate>
             </Column>
-            <Column T="AggregatedData" Field="NewCost" Title="New Cost">
+            <Column T="AccountData" Field="NewCost" Title="New Cost">
                 <CellTemplate>
                     $@context.Item.NewCost.ToString("F2")
                 </CellTemplate>
