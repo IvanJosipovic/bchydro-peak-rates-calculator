@@ -11,8 +11,20 @@ public partial class Index
 
     List<AggregatedData> finalData = new();
 
+    // Charge per each day
+    public decimal basicCharge = 0.2090M;
 
-    double basicCharge = 0.2090;
+    // Regional transit levy per day
+    public decimal transitLevy = 0.0624M;
+
+    // Step 1 charge per kWh
+    public decimal step1Rate = 0.0950M;
+
+    // Step 2 charge per kWh
+    public decimal step2Rate = 0.1408M;
+
+    // Step treshold
+    public int stepTreshold = 1350;
 
     List<IGrouping<GroupClass,AccountData>> monthGrouppings;
 
@@ -39,7 +51,7 @@ public partial class Index
                 var record = new AccountData
                 {
                     IntervalStartDateTime = csv.GetField<DateTime>("Interval Start Date/Time"),
-                    NetConsumption = csv.GetField("Net Consumption (kWh)") == "N/A" ? 0.0 : csv.GetField<double>("Net Consumption (kWh)")
+                    NetConsumption = csv.GetField("Net Consumption (kWh)") == "N/A" ? 0.0M : csv.GetField<decimal>("Net Consumption (kWh)")
                 };
                 accounDatas.Add(record);
             }
@@ -50,8 +62,8 @@ public partial class Index
         foreach (var record in accounDatas)
         {
             var step2 = IsStep2(record);
-            record.OldCost = basicCharge + GetOldCost(step2);
-            record.NewCost = basicCharge + GetNewCost(step2, record);
+            record.OldCost = basicCharge + transitLevy + GetOldCost(step2);
+            record.NewCost = basicCharge + transitLevy + GetNewCost(step2, record);
         }
 
         foreach (var group in monthGrouppings)
@@ -95,22 +107,22 @@ public partial class Index
         //public string AccountHolder { get; set; }
         //public string AccountNumber { get; set; }
         public DateTime IntervalStartDateTime { get; set; }
-        public double NetConsumption { get; set; }
+        public decimal NetConsumption { get; set; }
         //public string Demand { get; set; }
         //public string PowerFactor { get; set; }
         //public string EstimatedUsage { get; set; }
         //public string ServiceAddress { get; set; }
         //public string City { get; set; }
-        public double OldCost { get; set; }
-        public double NewCost { get; set; }
+        public decimal OldCost { get; set; }
+        public decimal NewCost { get; set; }
     }
 
     public class AggregatedData
     {
         public DateTime IntervalStartDateTime { get; set; }
-        public double NetConsumption { get; set; }
-        public double OldCost { get; set; }
-        public double NewCost { get; set; }
+        public decimal NetConsumption { get; set; }
+        public decimal OldCost { get; set; }
+        public decimal NewCost { get; set; }
     }
 
     public bool IsStep2(AccountData data)
@@ -126,20 +138,20 @@ public partial class Index
 
         var average = months.Average(x => x.NetConsumption);
 
-        if (average > 1350) {
+        if (average > stepTreshold) {
             return true;
         }
 
         return false;
     }
 
-    public double GetOldCost(bool step2)
+    public decimal GetOldCost(bool step2)
     {
-        return step2 == false ? 0.0950 : 0.1408;
+        return step2 == false ? step1Rate : step2Rate;
     }
 
-    public double GetNewCost(bool step2, AccountData data)
+    public decimal GetNewCost(bool step2, AccountData data)
     {
-        return 0.00;
+        return 0.00M;
     }
 }

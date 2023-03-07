@@ -28,11 +28,20 @@
                 </CellTemplate>
             </Column>
             <Column T="AggregatedData" Field="NetConsumption">
+                <CellTemplate>
+                    @context.Item.NetConsumption.ToString("F2")kw
+                </CellTemplate>
             </Column>
-            <Column T="AggregatedData" Field="OldCost">
 
+            <Column T="AggregatedData" Field="OldCost">
+                <CellTemplate>
+                    $@context.Item.OldCost.ToString("F2")
+                </CellTemplate>
             </Column>
             <Column T="AggregatedData" Field="NewCost">
+                <CellTemplate>
+                    $@context.Item.NewCost.ToString("F2")
+                </CellTemplate>
             </Column>
         </Columns>
     </MudDataGrid>
