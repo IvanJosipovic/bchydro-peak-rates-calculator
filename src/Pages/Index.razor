@@ -1,0 +1,76 @@
+﻿@page "/"
+@using CsvHelper;
+@using System.Globalization;
+@using CsvHelper.Configuration;
+
+<PageTitle>BC Hydro Peak Rates Calculator</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudText Typo="Typo.h4">BC Hydro Peak Rates Calculator</MudText>
+
+    <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles" Accept=".csv" MaximumFileCount="1">
+        <ButtonTemplate>
+            <MudButton HtmlTag="label"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                       for="@context">
+                Load CSV
+            </MudButton>
+        </ButtonTemplate>
+    </MudFileUpload>
+</MudContainer>
+
+@code
+{
+    private async Task UploadFiles(IBrowserFile file) {
+        var memory = new MemoryStream();
+        await file.OpenReadStream().CopyToAsync(memory);
+        memory.Seek(0, SeekOrigin.Begin);
+
+        using (var reader = new StreamReader(memory))
+        using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+        {
+            csv.Context.RegisterClassMap<AccountDataMap>();
+
+            IEnumerable<AccountData> records = csv.GetRecords<AccountData>();
+
+
+            foreach (var r in records)
+            {
+                Console.WriteLine(r.AccountHolder);
+            }
+        }
+    }
+
+    public class AccountData
+    {
+        public string AccountHolder { get; set; }
+        public string AccountNumber { get; set; }
+        public DateTime IntervalStartDateTime { get; set; }
+        public string NetConsumption { get; set; }
+        public string Demand { get; set; }
+        public string PowerFactor { get; set; }
+        public string EstimatedUsage { get; set; }
+        public string ServiceAddress { get; set; }
+        public string City { get; set; }
+        public double OldCost { get; set; }
+        public double NewCost { get; set; }
+    }
+
+    public sealed class AccountDataMap : ClassMap<AccountData>
+    {
+        public AccountDataMap()
+        {
+            Map(m => m.AccountHolder).Name("Account Holder");
+            Map(m => m.AccountNumber).Name("Account Number");
+            Map(m => m.IntervalStartDateTime).Name("Interval Start Date/Time");
+            Map(m => m.NetConsumption).Name("Net Consumption (kWh)");
+            Map(m => m.Demand).Name("Demand (kW)");
+            Map(m => m.PowerFactor).Name("Power Factor (%)");
+            Map(m => m.EstimatedUsage).Name("Estimated Usage");
+            Map(m => m.ServiceAddress).Name("Service Address");
+            Map(m => m.City).Name("City");
+        }
+    }
+}
