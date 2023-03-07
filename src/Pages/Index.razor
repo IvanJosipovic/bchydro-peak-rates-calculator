@@ -23,9 +23,11 @@
 
 @code
 {
+    List<AccountData> accounDatas;
+
     private async Task UploadFiles(IBrowserFile file) {
         var memory = new MemoryStream();
-        await file.OpenReadStream().CopyToAsync(memory);
+        await file.OpenReadStream(long.MaxValue).CopyToAsync(memory);
         memory.Seek(0, SeekOrigin.Begin);
 
         using (var reader = new StreamReader(memory))
@@ -33,12 +35,15 @@
         {
             csv.Context.RegisterClassMap<AccountDataMap>();
 
-            IEnumerable<AccountData> records = csv.GetRecords<AccountData>();
+            accounDatas = csv.GetRecords<AccountData>().ToList();
 
-
-            foreach (var r in records)
+            foreach (var record in accounDatas)
             {
-                Console.WriteLine(r.AccountHolder);
+                var step2 = IsStep2(record);
+
+                record.OldCost = 0.2090 + GetOldCost(step2);
+
+                record.NewCost = 0.2090 + GetNewCost(step2, record);
             }
         }
     }
@@ -72,5 +77,21 @@
             Map(m => m.ServiceAddress).Name("Service Address");
             Map(m => m.City).Name("City");
         }
+    }
+
+
+    public bool IsStep2(AccountData data)
+    {
+        return true;
+    }
+
+    public double GetOldCost(bool step2)
+    {        
+        return step2 == false ? 0.0950 : 0.1408;
+    }
+
+    public double GetNewCost(bool step2, AccountData data)
+    {
+        return 0.00;
     }
 }
