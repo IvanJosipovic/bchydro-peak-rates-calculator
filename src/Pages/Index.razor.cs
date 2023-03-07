@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Components.Forms;
 using CsvHelper;
 using System.Globalization;
 using CsvHelper.Configuration;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace bchydro_peak_rates_calculator.Pages;
 
@@ -10,7 +9,9 @@ public partial class Index
 {
     List<AccountData> accounDatas = new();
 
-    List<AggregatedData> finalData = new();
+    List<AccountData> finalData = new();
+
+    List<IGrouping<GroupClass, AccountData>> monthGrouppings;
 
     // Charge per each day
     public decimal basicCharge = 0.2090M;
@@ -26,8 +27,6 @@ public partial class Index
 
     // Step treshold
     public int stepTreshold = 1350;
-
-    List<IGrouping<GroupClass,AccountData>> monthGrouppings;
 
     private async Task UploadFiles(IBrowserFile file)
     {
@@ -64,12 +63,12 @@ public partial class Index
         {
             var step2 = IsStep2(record);
             record.OldCost = basicCharge + transitLevy + GetOldCost(step2);
-            record.NewCost = basicCharge + transitLevy + GetNewCost(step2, record);
+            record.NewCost = basicCharge + transitLevy + GetNewCost(step2, record.IntervalStartDateTime.Hour);
         }
 
         foreach (var group in monthGrouppings)
         {
-            var item = new AggregatedData
+            var item = new AccountData
             {
                 IntervalStartDateTime = DateTime.Parse($"{group.Key.Month}/{group.Key.Year}"),
                 NetConsumption = group.Sum(x => x.NetConsumption),
@@ -106,7 +105,7 @@ public partial class Index
         return step2 == false ? step1Rate : step2Rate;
     }
 
-    public decimal GetNewCost(bool step2, AccountData data)
+    public decimal GetNewCost(bool step2, int hour)
     {
         // Peak hour list
         int[] peakHours = new int[] { 16, 17, 18, 19, 20 };
@@ -120,11 +119,11 @@ public partial class Index
         // Off peak discount
         decimal offPeakDiscount = 0.05M;
 
-        if (peakHours.Contains(data.IntervalStartDateTime.Hour))
+        if (peakHours.Contains(hour))
         {
             return GetOldCost(step2) + peakSurchage;
         }
-        else if (offPeak.Contains(data.IntervalStartDateTime.Hour))
+        else if (offPeak.Contains(hour))
         {
             return GetOldCost(step2) - offPeakDiscount;
         }
