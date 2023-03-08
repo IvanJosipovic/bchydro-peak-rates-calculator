@@ -1,0 +1,56 @@
+﻿@page "/"
+@using CsvHelper;
+@using System.Globalization;
+@using CsvHelper.Configuration;
+
+<PageTitle>BC Hydro Peak Rates Calculator</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudText Typo="Typo.h4">BC Hydro Peak Rates Calculator</MudText>
+    <br />
+    <MudLink Href="https://app.bchydro.com/datadownload/web/download-centre.html" Target="_blank">
+        Go to BC Hydro Data Export Centre
+    </MudLink>
+    <MudText>
+        Export the "Consumption History" with the Hourly Interval for the past 11 months and load the CSV below.
+    </MudText>
+    <br />
+    <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles" Accept=".csv" MaximumFileCount="1">
+        <ButtonTemplate>
+            <MudButton HtmlTag="label"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                       for="@context">
+                Load CSV
+            </MudButton>
+        </ButtonTemplate>
+    </MudFileUpload>
+</MudContainer>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-5">
+    <MudDataGrid Items="@finalData" Dense="true" Hover="true">
+        <Columns>
+            <Column T="AccountData" Field="IntervalStartDateTime" Title="Month & Year">
+                <CellTemplate>
+                    @context.Item.IntervalStartDateTime.Month/@context.Item.IntervalStartDateTime.Year
+                </CellTemplate>
+            </Column>
+            <Column T="AccountData" Field="NetConsumption" Title="Net Consumption">
+                <CellTemplate>
+                    @context.Item.NetConsumption.ToString("F2")kw
+                </CellTemplate>
+            </Column>
+            <Column T="AccountData" Field="OldCost" Title="Old Cost">
+                <CellTemplate>
+                    $@context.Item.OldCost.ToString("F2")
+                </CellTemplate>
+            </Column>
+            <Column T="AccountData" Field="NewCost" Title="New Cost">
+                <CellTemplate>
+                    $@context.Item.NewCost.ToString("F2")
+                </CellTemplate>
+            </Column>
+        </Columns>
+    </MudDataGrid>
+</MudContainer>
